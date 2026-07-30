@@ -18,7 +18,7 @@ Training hyperparameters, Chat Template usage, label masking, LoRA configuration
 
 ## Included scope
 
-Inspect and include source files that participate in the current workflow, expected to include:
+Inspect the following candidate source files. Include each file when it participates in data preparation, training, evaluation, result analysis, or the demonstrated inference workflow; exclude it only when inspection shows it is a disposable scratch script:
 
 - `data_processor.py`
 - `baseline.py`
