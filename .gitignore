@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Project-specific generated artifacts
+.vscode/
+.idea/
+kv_cache_env/
+data/
+processed_data/
+qwen3_lora_output/
+qwen3_lora_best/
+qwen3_lora_adapter/
+checkpoint-*/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.parquet
+baseline_results.jsonl
+finetuned_results.jsonl
+error_samples.jsonl
+gh-auth.out
+gh-auth.err
