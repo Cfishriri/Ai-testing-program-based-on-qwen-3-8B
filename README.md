@@ -1,101 +1,42 @@
-# Ai-testing-program-based-on-qwen-3-8B
 
-一个用于整理问答数据、运行 Qwen 3 8B 基线评测和进行多轮交互测试的最小可复现项目。
+# Qwen3-8B 数学推理 LoRA 实验
 
-> 本仓库处于学习与测试阶段。代码可能仍有未覆盖的边界情况，欢迎反馈。
+本分支公开的是 `blockdata` 工作区当前使用的真实数据处理、基线测试、LoRA 训练和微调后测试逻辑。除了把服务器绝对路径替换为环境变量外，没有重构训练、生成或评分算法。
 
-## 包含内容
+## 主流程
 
-- `data_processor.py`：读取 Parquet、CSV、JSON 或 JSONL，校验 `question` / `answer` 字段，按 tokenizer 长度过滤并拆分训练、验证、测试集。
-- `baseline.py`：对 JSONL 测试集执行确定性生成，将回答、最终数值和正确性写入 JSONL。
-- `chat_persistent.py`：保留对话历史的交互式命令行聊天。
-- `check_gpu.py`：输出 PyTorch、CUDA 和显卡信息。
-- `examples/sample.jsonl`：不包含隐私或业务数据的输入示例。
+1. `data_processor.py`：把 GSM8K 的 `question` / `answer` 转成 Qwen Chat Template token，并只对 assistant 答案计算 loss。
+2. `baseline.py`：测试原始 Qwen3-8B。
+3. `lora-math-reasoning.py`：训练 LoRA，并保存最佳适配器。
+4. `finetuned.py`：加载基础模型和 LoRA 适配器进行评测。
+5. `check_answer.py`：查找“基线正确、LoRA 错误”的样本。
 
-模型权重、完整数据集、运行结果、虚拟环境和编辑器设置不会提交到仓库。
+辅助脚本：`decode.py` 检查 token/label 边界，`check_gpu.py` 检查运行环境。
 
-## 环境要求
-
-- Python 3.10 或更高版本
-- Qwen 3 8B 模型可访问（本地目录或 Hugging Face 模型 ID）
-- 推理建议使用支持 CUDA 的 NVIDIA GPU；显存需求取决于精度、量化方式和批大小
-
-安装依赖：
+## 安装与路径
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
+export MODEL_PATH=/path/to/Qwen3-8B
+export INPUT_FILE=/path/to/train.parquet
+export ADAPTER_PATH=/path/to/qwen3_lora_best
 ```
 
-Windows PowerShell 激活命令为 `.venv\Scripts\Activate.ps1`。
+脚本使用 `local_files_only=True`，模型需已下载到本地。默认模型标识是 `Qwen/Qwen3-8B`，默认输入是 `./data/train.parquet`，默认适配器是 `./qwen3_lora_best`。
 
-## 数据格式
+## 当前真实训练参数
 
-输入记录至少需要两个字符串字段：
+- `r=8`、`lora_alpha=16`、dropout `0.05`
+- 目标层：`q_proj`、`v_proj`
+- 1 epoch，单卡 batch 2，梯度累积 8
+- 学习率 `5e-5`
+- 每 200 step 保存并评估，以 `eval_loss` 选择最佳 checkpoint
 
-```json
-{"question": "题目文本", "answer": "解题过程 #### 12"}
-```
+## 准确率下降时首先检查
 
-GSM8K 风格答案中的 `#### 数值` 会作为最终答案；如果没有该标记，评测脚本会使用文本中最后出现的数值。完整示例见 `examples/sample.jsonl`。
+- `baseline.py` 使用 `system_prompt=None`，`finetuned.py` 使用数学 system prompt，评测输入不完全一致。
+- 数据处理也使用 `system_prompt=None`，与微调后测试 prompt 不一致。
+- `finetuned.py` 当前仍写入 `baseline_results.jsonl`；这是工作区真实行为，发布时未擅自修改。需要并排比较时，应改为 `finetuned_results.jsonl`。
+- 只比较 checkpoint 的准确率前，应固定同一测试集、prompt、解码设置和评分函数。
 
-## 1. 检查 GPU
-
-```bash
-python check_gpu.py
-```
-
-## 2. 整理数据
-
-```bash
-python data_processor.py \
-  --model-path Qwen/Qwen3-8B \
-  --input-file examples/sample.jsonl \
-  --output-dir processed_data
-```
-
-如果模型和 tokenizer 已经下载到本地，可以把 `--model-path` 指向该目录，并增加 `--local-files-only`。
-
-默认拆分比例为 80% / 10% / 10%。小型示例可能因向下取整而让部分拆分为空；正式使用时请提供足够多的记录。
-
-## 3. 运行基线评测
-
-```bash
-python baseline.py \
-  --model-path Qwen/Qwen3-8B \
-  --test-file processed_data/test.jsonl \
-  --output-file baseline_results.jsonl \
-  --batch-size 4
-```
-
-显存不足时先降低 `--batch-size` 和 `--max-new-tokens`。输出文件会逐行保存原始记录、模型回答、预测值、期望值和 `is_correct`。
-
-## 4. 交互式聊天
-
-```bash
-python chat_persistent.py \
-  --model-path Qwen/Qwen3-8B \
-  --system-prompt "You are a helpful assistant."
-```
-
-输入 `/reset` 清空对话历史，输入 `/exit` 退出。
-
-## 验证
-
-仓库的 GitHub Actions 使用 Python 标准库执行源代码契约检查，验证：
-
-- 必要文件齐全；
-- Python 源文件可解析；
-- 脚本不包含原服务器的 `/root/` 硬编码路径；
-- 主要入口提供命令行参数。
-
-本地可运行：
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-## 安全说明
-
-不要提交访问令牌、私有数据、模型权重或包含敏感信息的输出。默认 `.gitignore` 已排除常见的大文件和本项目的本地运行产物。
+模型权重、LoRA checkpoint、虚拟环境、原始数据及生成结果未上传。发布范围见 `docs/publication/file-inventory.md`。

@@ -218,16 +218,26 @@ __marimo__/
 .streamlit/secrets.toml
 
 
-# Project-local runtime artifacts
+
+# Project-specific generated artifacts
 .vscode/
+.idea/
 kv_cache_env/
-lost+found/
+data/
 processed_data/
-*_results.jsonl
-conda env list.py
+qwen3_lora_output/
+qwen3_lora_best/
+qwen3_lora_adapter/
+checkpoint-*/
+
 *.safetensors
 *.bin
 *.pt
 *.pth
-*.ckpt
-*.onnx
+
+*.parquet
+baseline_results.jsonl
+finetuned_results.jsonl
+error_samples.jsonl
+gh-auth.out
+gh-auth.err

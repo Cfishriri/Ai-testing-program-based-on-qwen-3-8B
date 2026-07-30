@@ -1,19 +1,23 @@
-import platform
+import sys
+print("Python路径:", sys.executable)
 
 import torch
+import psutil
 
+print("=" * 60)
+print("环境检查")
+print("=" * 60)
 
-def main():
-    print(f"Python platform: {platform.platform()}")
-    print(f"PyTorch: {torch.__version__}")
-    print(f"CUDA available: {torch.cuda.is_available()}")
-    print(f"CUDA runtime: {torch.version.cuda}")
-    print(f"GPU count: {torch.cuda.device_count()}")
-    for index in range(torch.cuda.device_count()):
-        properties = torch.cuda.get_device_properties(index)
-        memory_gib = properties.total_memory / 1024**3
-        print(f"GPU {index}: {properties.name} ({memory_gib:.1f} GiB)")
+print(f"PyTorch版本: {torch.__version__}")
+print(f"CUDA可用: {torch.cuda.is_available()}")
 
+if torch.cuda.is_available():
+    print(f"GPU数量: {torch.cuda.device_count()}")
+    for i in range(torch.cuda.device_count()):
+        print(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+        props = torch.cuda.get_device_properties(i)
+        print(f"  显存: {props.total_memory / 1024**3:.2f} GB")
 
-if __name__ == "__main__":
-    main()
+mem = psutil.virtual_memory()
+print(f"\nCPU内存总量: {mem.total / 1024**3:.2f} GB")
+print(f"CPU可用内存: {mem.available / 1024**3:.2f} GB")

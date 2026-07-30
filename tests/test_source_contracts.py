@@ -1,33 +1,41 @@
 import ast
-import unittest
 from pathlib import Path
-
+import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ("baseline.py", "data_processor.py", "chat_persistent.py", "check_gpu.py")
+CORE = [
+    "data_processor.py",
+    "baseline.py",
+    "lora-math-reasoning.py",
+    "finetuned.py",
+]
+ALL_SOURCES = CORE + ["decode.py", "check_answer.py", "check_gpu.py"]
 
 
-class ProjectContractTests(unittest.TestCase):
-    def test_required_files_exist(self):
-        required = (*SCRIPTS, "README.md", "requirements.txt", ".gitignore")
-        for relative_path in required:
-            self.assertTrue((ROOT / relative_path).is_file(), relative_path)
+class SourceContracts(unittest.TestCase):
+    def test_sources_exist_are_nonempty_and_parse(self):
+        for name in ALL_SOURCES:
+            path = ROOT / name
+            self.assertTrue(path.is_file(), name)
+            text = path.read_text(encoding="utf-8")
+            self.assertGreater(len(text.strip()), 20, name)
+            ast.parse(text, filename=name)
 
-    def test_python_sources_parse(self):
-        for relative_path in SCRIPTS:
-            source = (ROOT / relative_path).read_text(encoding="utf-8")
-            ast.parse(source, filename=relative_path)
+    def test_private_server_paths_are_removed(self):
+        for name in ALL_SOURCES:
+            text = (ROOT / name).read_text(encoding="utf-8")
+            self.assertNotIn("/root/", text, name)
+            self.assertNotIn("eb-public", text, name)
 
-    def test_scripts_do_not_embed_server_root_paths(self):
-        for relative_path in SCRIPTS:
-            source = (ROOT / relative_path).read_text(encoding="utf-8")
-            self.assertNotIn("/root/", source, relative_path)
+    def test_authentic_lora_hyperparameters_are_preserved(self):
+        text = (ROOT / "lora-math-reasoning.py").read_text(encoding="utf-8")
+        for snippet in ("r=8", "lora_alpha=16", "learning_rate=5e-5"):
+            self.assertIn(snippet, text)
 
-    def test_main_scripts_expose_command_line_interfaces(self):
-        for relative_path in ("baseline.py", "data_processor.py", "chat_persistent.py"):
-            source = (ROOT / relative_path).read_text(encoding="utf-8")
-            self.assertIn("argparse", source, relative_path)
-            self.assertIn("if __name__ == \"__main__\":", source, relative_path)
+    def test_generated_artifacts_are_ignored(self):
+        ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+        for item in ("processed_data/", "qwen3_lora_output/", "*.safetensors"):
+            self.assertIn(item, ignore)
 
 
 if __name__ == "__main__":
