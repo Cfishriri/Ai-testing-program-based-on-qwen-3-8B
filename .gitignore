@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Project-local runtime artifacts
+.vscode/
+kv_cache_env/
+lost+found/
+processed_data/
+*_results.jsonl
+conda env list.py
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
