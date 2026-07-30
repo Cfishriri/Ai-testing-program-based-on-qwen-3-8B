@@ -218,6 +218,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 
+
 # Project-specific generated artifacts
 .vscode/
 .idea/
@@ -228,10 +229,12 @@ qwen3_lora_output/
 qwen3_lora_best/
 qwen3_lora_adapter/
 checkpoint-*/
+
 *.safetensors
 *.bin
 *.pt
 *.pth
+
 *.parquet
 baseline_results.jsonl
 finetuned_results.jsonl
