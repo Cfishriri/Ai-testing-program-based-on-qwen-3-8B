@@ -204,9 +204,9 @@ class DataProcessor:
         test_data = processed[val_end:]
         # 保存目录
         os.makedirs(output_dir, exist_ok=True)
-        train_path = os.path.join(output_dir, "None system train.jsonl")
-        val_path = os.path.join(output_dir, "None system val.jsonl")
-        test_path = os.path.join(output_dir, "None system test.jsonl")
+        train_path = os.path.join(output_dir, "train.jsonl")
+        val_path = os.path.join(output_dir, "val.jsonl")
+        test_path = os.path.join(output_dir, "test.jsonl")
     
         self._save_jsonl(train_data, train_path)
         self._save_jsonl(val_data, val_path)
@@ -253,7 +253,7 @@ if __name__ == "__main__":
         output_dir=OUTPUT_DIR,
         user_field="question",
         assistant_field="answer",
-        system_prompt=None,
+        system_prompt=SYSTEM_PROMPT_GSM8K,
         train_ratio=0.8,
         val_ratio=0.1,
         seed=42
