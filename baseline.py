@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from tqdm import tqdm
 # ===================== 配置 =====================
 MODEL_PATH = os.environ.get("MODEL_PATH", "Qwen/Qwen3-8B")
-TEST_FILE = "test.jsonl"
+TEST_FILE = "./processed_data/test.jsonl"
 OUTPUT_FILE = "./baseline_results.jsonl"
 SYSTEM_PROMPT = """
 你是一个数学解题助手。
