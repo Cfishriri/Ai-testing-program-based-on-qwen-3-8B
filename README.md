@@ -33,10 +33,6 @@ export ADAPTER_PATH=/path/to/qwen3_lora_best
 - 每 200 step 保存并评估，以 `eval_loss` 选择最佳 checkpoint
 
 ## 准确率下降时首先检查
-
-- `baseline.py` 使用 `system_prompt=None`，`finetuned.py` 使用数学 system prompt，评测输入不完全一致。
-- 数据处理也使用 `system_prompt=None`，与微调后测试 prompt 不一致。
-- `finetuned.py` 当前仍写入 `baseline_results.jsonl`；这是工作区真实行为，发布时未擅自修改。需要并排比较时，应改为 `finetuned_results.jsonl`。
 - 只比较 checkpoint 的准确率前，应固定同一测试集、prompt、解码设置和评分函数。
 
 模型权重、LoRA checkpoint、虚拟环境、原始数据及生成结果未上传。发布范围见 `docs/publication/file-inventory.md`。
