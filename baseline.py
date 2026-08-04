@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from tqdm import tqdm
 # ===================== 配置 =====================
 MODEL_PATH = os.environ.get("MODEL_PATH", "Qwen/Qwen3-8B")
-TEST_FILE = "./processed_data/test.jsonl"
+TEST_FILE = "test.jsonl"
 OUTPUT_FILE = "./baseline_results.jsonl"
 SYSTEM_PROMPT = """
 你是一个数学解题助手。
@@ -20,20 +20,17 @@ SYSTEM_PROMPT = """
 BATCH_SIZE = 32
 def extract_errors(results_file: str, output_file: str = "./error_samples.jsonl"):
     """
-    从基线结果中提取预测错误的样本
-    
+    从基线结果中提取预测错误的样本 
     Args:
         results_file: 基线结果文件路径
         output_file: 错误样本输出路径
     """
     errors = []
-    
     with open(results_file, "r", encoding="utf-8") as f:
         for line in f:
             sample = json.loads(line)
             if not sample["correct"]:
                 errors.append(sample)
-    
     # 保存错误样本
     with open(output_file, "w", encoding="utf-8") as f:
         for err in errors:
