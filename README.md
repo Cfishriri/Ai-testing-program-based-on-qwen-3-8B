@@ -1,7 +1,7 @@
 
 # Qwen3-8B 数学推理 LoRA 实验
 
-本分支公开的是 `blockdata` 工作区当前使用的真实数据处理、基线测试、LoRA 训练和微调后测试逻辑。除了把服务器绝对路径替换为环境变量外，没有重构训练、生成或评分算法。
+本分支公开的是工作区当前使用的真实数据处理、基线测试、LoRA 训练和微调后测试逻辑。
 
 ## 主流程
 
@@ -35,4 +35,4 @@ export ADAPTER_PATH=/path/to/qwen3_lora_best
 ## 准确率下降时首先检查
 - 只比较 checkpoint 的准确率前，应固定同一测试集、prompt、解码设置和评分函数。
 
-模型权重、LoRA checkpoint、虚拟环境、原始数据及生成结果未上传。发布范围见 `docs/publication/file-inventory.md`。
+模型权重、checkpoint、虚拟环境、原始数据及生成结果未上传。发布范围见 `docs/publication/file-inventory.md`。
