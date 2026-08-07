@@ -3,13 +3,14 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE = [
+
+# 只保留实际存在的文件
+ALL_SOURCES = [
     "data_processor.py",
     "baseline.py",
     "lora-math-reasoning.py",
-    # "finetuned.py",   # 已移除，该文件不存在
+    "check_answer.py",
 ]
-ALL_SOURCES = CORE + ["decode.py", "check_answer.py"]  # 也移除了 check_gpu.py
 
 
 class SourceContracts(unittest.TestCase):
