@@ -9,7 +9,7 @@ CORE = [
     "lora-math-reasoning.py",
     "finetuned.py",
 ]
-ALL_SOURCES = CORE + ["decode.py", "check_answer.py", "check_gpu.py"]
+ALL_SOURCES = CORE + ["decode.py", "check_answer.py"]  # 移除了 check_gpu.py
 
 
 class SourceContracts(unittest.TestCase):
