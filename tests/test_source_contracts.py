@@ -7,9 +7,9 @@ CORE = [
     "data_processor.py",
     "baseline.py",
     "lora-math-reasoning.py",
-    "finetuned.py",
+    # "finetuned.py",   # 已移除，该文件不存在
 ]
-ALL_SOURCES = CORE + ["decode.py", "check_answer.py"]  # 移除了 check_gpu.py
+ALL_SOURCES = CORE + ["decode.py", "check_answer.py"]  # 也移除了 check_gpu.py
 
 
 class SourceContracts(unittest.TestCase):
